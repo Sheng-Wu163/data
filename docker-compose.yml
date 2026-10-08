@@ -1,0 +1,75 @@
+# One-command startup: `docker compose up --build`.
+#
+# Hardening / production notes:
+#   - Inter-container traffic is confined to a dedicated user-defined bridge
+#     network ("backend"); the client reaches the server by service name DNS
+#     (http://server:8080). The server is published to the host on loopback
+#     only, so it is not exposed to the outside world.
+#   - The client starts only after the server reports healthy via a real
+#     HTTP probe (the server binary probes its own /health endpoint).
+#   - Both containers run as uid/gid 10001 with a read-only root filesystem,
+#     all Linux capabilities dropped, and no-new-privileges set.
+#   - Fingerprint rules are mounted read-only and loaded at runtime, keeping
+#     detection logic decoupled from the program.
+name: banner-fingerprint
+
+services:
+  server:
+    build:
+      context: .
+      target: server
+    image: banner-fingerprint-server:latest
+    environment:
+      PORT: "8080"
+      RULES_PATH: "/etc/fingerprint/rules.json"
+    volumes:
+      # Rule set is external data, injected at runtime (no rebuild required).
+      - ./rules/rules.json:/etc/fingerprint/rules.json:ro
+    ports:
+      # Loopback-only publish for host-side testing; not exposed externally.
+      - "127.0.0.1:8080:8080"
+    networks:
+      - backend
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/server", "-healthcheck", "-port", "8080"]
+      interval: 5s
+      timeout: 3s
+      retries: 6
+      start_period: 3s
+
+  client:
+    build:
+      context: .
+      target: client
+    image: banner-fingerprint-client:latest
+    depends_on:
+      server:
+        condition: service_healthy
+    environment:
+      SERVER_URL: "http://server:8080"
+      CLIENT_INPUT: "/data/input.json"
+    volumes:
+      # Swap ./testdata for your own directory to feed the evaluator's data.
+      - ./testdata:/data:ro
+    networks:
+      - backend
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: "no"
+
+networks:
+  backend:
+    driver: bridge

@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "unknown_confidence": 0.0,
+  "rules": [
+    {
+      "name": "ssh",
+      "protocol": "SSH",
+      "priority": 100,
+      "require_all": ["^SSH-[0-9]"],
+      "product_default": "OpenSSH",
+      "product_regex": "SSH-[0-9.]+-([A-Za-z][A-Za-z0-9._-]*?)_[0-9]",
+      "version_regex": "SSH-[0-9.]+-[A-Za-z][A-Za-z0-9._-]*?_([0-9][0-9A-Za-z._p-]*)",
+      "os_rules": [
+        {"regex": "(?i)ubuntu", "os": "Ubuntu"},
+        {"regex": "(?i)debian", "os": "Debian"},
+        {"regex": "(?i)freebsd", "os": "FreeBSD"},
+        {"regex": "(?i)centos", "os": "CentOS"},
+        {"regex": "(?i)raspbian", "os": "Raspbian"},
+        {"regex": "(?i)opensuse", "os": "openSUSE"}
+      ],
+      "confidence": 0.95
+    },
+    {
+      "name": "mariadb",
+      "protocol": "MySQL",
+      "priority": 96,
+      "require_all": ["(?i)mariadb"],
+      "product_default": "MariaDB",
+      "version_regex": "(?i)(?:[0-9]+\\.[0-9]+\\.[0-9]+-)?([0-9]+\\.[0-9]+\\.[0-9]+)-mariadb",
+      "confidence": 0.9
+    },
+    {
+      "name": "mysql",
+      "protocol": "MySQL",
+      "priority": 95,
+      "require_all": ["\\x0a[0-9]+\\.[0-9]+\\.[0-9]+"],
+      "require_any": ["\\x00"],
+      "product_default": "MySQL",
+      "version_regex": "\\x0a([0-9]+\\.[0-9]+\\.[0-9]+)",
+      "confidence": 0.9
+    },
+    {
+      "name": "redis",
+      "protocol": "Redis",
+      "priority": 90,
+      "require_any": ["^-ERR", "^\\+PONG", "^-NOAUTH", "^\\+OK", "^-DENIED", "(?i)\\bredis\\b"],
+      "product_default": "Redis",
+      "confidence": 0.7
+    },
+    {
+      "name": "ftp",
+      "protocol": "FTP",
+      "priority": 88,
+      "require_all": ["^220[ -]"],
+      "require_any": ["(?i)ftp"],
+      "product_default": "FTP",
+      "product_regex": "(?i)(proftpd|vsftpd|pure-ftpd|filezilla|wu-ftpd|serv-u|glftpd)",
+      "version_regex": "(?i)(?:proftpd|vsftpd|pure-ftpd|filezilla|wu-ftpd|serv-u|glftpd)[ /_]?v?([0-9]+\\.[0-9]+(?:\\.[0-9]+)?)",
+      "confidence": 0.9
+    },
+    {
+      "name": "http-nginx",
+      "protocol": "HTTP",
+      "priority": 86,
+      "require_all": ["(?i)server:\\s*nginx"],
+      "product_default": "nginx",
+      "version_regex": "(?i)nginx/?\\s*([0-9]+\\.[0-9]+(?:\\.[0-9]+)?)",
+      "os_rules": [
+        {"regex": "(?i)ubuntu", "os": "Ubuntu"},
+        {"regex": "(?i)debian", "os": "Debian"}
+      ],
+      "confidence": 0.9
+    },
+    {
+      "name": "http-apache",
+      "protocol": "HTTP",
+      "priority": 85,
+      "require_all": ["(?i)server:\\s*apache"],
+      "product_default": "Apache",
+      "version_regex": "(?i)apache/?\\s*([0-9]+\\.[0-9]+(?:\\.[0-9]+)?)",
+      "os_rules": [
+        {"regex": "(?i)ubuntu", "os": "Ubuntu"},
+        {"regex": "(?i)debian", "os": "Debian"}
+      ],
+      "confidence": 0.9
+    },
+    {
+      "name": "http-jetty",
+      "protocol": "HTTP",
+      "priority": 84,
+      "require_all": ["(?i)server:\\s*jetty"],
+      "product_default": "Jetty",
+      "version_regex": "(?i)jetty[/\\s(]*([0-9]+(?:\\.[0-9]+)+)",
+      "confidence": 0.85
+    },
+    {
+      "name": "http-iis",
+      "protocol": "HTTP",
+      "priority": 83,
+      "require_all": ["(?i)server:\\s*microsoft-iis"],
+      "product_default": "Microsoft-IIS",
+      "version_regex": "(?i)microsoft-iis/?\\s*([0-9]+\\.[0-9]+)",
+      "confidence": 0.9
+    },
+    {
+      "name": "http-generic",
+      "protocol": "HTTP",
+      "priority": 70,
+      "require_any": ["^HTTP/1\\.[01]", "(?i)^server:\\s*\\S", "^GET ", "^HEAD ", "^POST "],
+      "product_regex": "(?i)server:\\s*([A-Za-z][A-Za-z0-9._-]*)",
+      "version_regex": "(?i)server:\\s*[A-Za-z][A-Za-z0-9._-]*/?\\s*([0-9]+(?:\\.[0-9]+)+)",
+      "confidence": 0.75
+    },
+    {
+      "name": "tls",
+      "protocol": "TLS",
+      "priority": 60,
+      "require_all": ["^\\x16\\x03"],
+      "confidence": 0.6
+    }
+  ]
+}
